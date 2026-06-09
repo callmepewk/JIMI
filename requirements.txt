@@ -1,0 +1,6 @@
+pvporcupine
+pyaudio
+webrtcvad
+noisereduce
+pyautogui
+psutil
