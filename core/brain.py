@@ -1,60 +1,46 @@
 import requests
 import json
 import os
-import webbrowser
 import subprocess
+import webbrowser
 from datetime import datetime
+
+from jimi.automation import execute_action
 
 # ==============================
 # CONFIG
 # ==============================
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3:8b-instruct-q4_0"
-TIMEOUT = 60
+MODEL = "phi3"
+TIMEOUT = 120
 
 MEMORY_FILE = "data/memory.json"
-PROFILE_FILE = "data/profile.json"
-
-MAX_HISTORY = 6
+PROJECTS_DIR = "projects/"
+TASKS_FILE = "data/tasks.json"
 
 DEBUG = True
-
-# ==============================
-# AUTOMAÇÃO
-# ==============================
-
 ACTION_MODE = True
 
-KNOWN_APPS = {
-    "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-    "notepad": "notepad.exe",
-    "calculadora": "calc.exe",
-    "explorer": "explorer.exe"
-}
+# ==============================
+# LOG
+# ==============================
+
+def log(*args):
+    if DEBUG:
+        print("[JIMI]", *args)
 
 # ==============================
-# MEMÓRIA
+# JSON UTILS
 # ==============================
 
 def load_json(path, default):
     if not os.path.exists(path):
         return default
-
     try:
         with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-            # 🔥 garante estrutura correta
-            for key in default:
-                if key not in data:
-                    data[key] = default[key]
-
-            return data
-
-    except Exception as e:
-        print("Erro ao carregar JSON:", e)
+            return json.load(f)
+    except:
         return default
 
 def save_json(path, data):
@@ -62,224 +48,215 @@ def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+# ==============================
+# MEMORY
+# ==============================
+
 memory = load_json(MEMORY_FILE, {
-    "user_name": "",
-    "preferences": [],
-    "history": []
-})
-# 🔥 AUTO-CORREÇÃO DA MEMÓRIA
-if "history" not in memory:
-    memory["history"] = []
-
-if "user_name" not in memory:
-    memory["user_name"] = ""
-
-if "preferences" not in memory:
-    memory["preferences"] = []
-
-profile = load_json(PROFILE_FILE, {
-    "personality": "direto, inteligente, útil"
+    "history": [],
+    "skills": [],
+    "projects": []
 })
 
-# ==============================
-# CONTEXTO
-# ==============================
-
-conversation_history = []
-
-def update_memory(user_input, response):
-    try:
-        if "history" not in memory or not isinstance(memory["history"], list):
-            memory["history"] = []
-
-        memory["history"].append({
-            "time": datetime.now().isoformat(),
-            "user": user_input,
-            "jimi": response
-        })
-
-        memory["history"] = memory["history"][-20:]
-
-        save_json(MEMORY_FILE, memory)
-
-    except Exception as e:
-        print("Erro ao salvar memória:", e)
-# ==============================
-# INTENT
-# ==============================
-
-def extract_intent(text):
-    text = text.lower()
-
-    if "abrir" in text:
-        for app in KNOWN_APPS:
-            if app in text:
-                return {"type": "open", "target": app}
-
-        if "youtube" in text:
-            return {"type": "open", "target": "https://youtube.com"}
-
-    if "pesquisar" in text or "buscar" in text:
-        query = text.replace("pesquisar", "").replace("buscar", "").strip()
-        return {"type": "search", "value": query}
-
-    return None
-
-def execute_intent(intent):
-    if not intent or not ACTION_MODE:
-        return None
-
-    try:
-        if intent["type"] == "open":
-            target = intent["target"]
-
-            if target in KNOWN_APPS:
-                subprocess.Popen(KNOWN_APPS[target])
-                return f"Abrindo {target}"
-
-            if target.startswith("http"):
-                webbrowser.open(target)
-                return "Abrindo navegador"
-
-        if intent["type"] == "search":
-            url = f"https://www.google.com/search?q={intent['value']}"
-            webbrowser.open(url)
-            return f"Pesquisando {intent['value']}"
-
-    except Exception as e:
-        return f"Erro na ação: {e}"
-
-    return None
-
-# ==============================
-# LLM CHECK
-# ==============================
-
-def ollama_online():
-    try:
-        r = requests.get("http://localhost:11434", timeout=2)
-        return True
-    except:
-        return False
-
-# ==============================
-# PROMPT
-# ==============================
-
-def build_prompt(user_input):
-    conversation_history.append(f"Usuário: {user_input}")
-    conversation_history[:] = conversation_history[-MAX_HISTORY:]
-
-    history = "\n".join(conversation_history)
-
-    return f"""
-Você é JIMI.
-Responda curto, direto, em português.
-
-{history}
-Jimi:
-"""
-
-# ==============================
-# FALLBACK (SEM IA)
-# ==============================
-
-def fallback_response(user_input):
-    text = user_input.lower()
-
-    if "oi" in text:
-        return "E aí."
-
-    if "tudo bem" in text:
-        return "Tudo certo."
-
-    return "Não consegui pensar direito agora."
+tasks = load_json(TASKS_FILE, [])
 
 # ==============================
 # LLM
 # ==============================
 
-def perguntar_llm(prompt):
-    if not ollama_online():
-        return None
-
+def ask_llm(prompt):
     try:
-        response = requests.post(
+        res = requests.post(
             OLLAMA_URL,
-            json={
-                "model": MODEL,
-                "prompt": prompt,
-                "stream": False
-            },
+            json={"model": MODEL, "prompt": prompt, "stream": False},
             timeout=TIMEOUT
         )
-
-        if DEBUG:
-            print("STATUS:", response.status_code)
-
-        if response.status_code != 200:
-            if DEBUG:
-                print(response.text)
-            return None
-
-        data = response.json()
-
-        if DEBUG:
-            print("RESPOSTA RAW:", data)
-
-        resposta = data.get("response", "").strip()
-
-        return resposta if resposta else None
-
+        return res.json().get("response", "").strip()
     except Exception as e:
-        print("Erro LLM:", e)
+        log("LLM erro:", e)
         return None
 
 # ==============================
-# COMANDOS
+# PLANNER (CÉREBRO REAL)
 # ==============================
 
-def handle_commands(text):
-    text = text.lower()
+def plan_task(user_input):
+    prompt = f"""
+Você é um sistema de planejamento de IA.
 
-    if "hora" in text:
-        return f"Agora são {datetime.now().strftime('%H:%M')}"
+Objetivo do usuário:
+{user_input}
 
-    if "meu nome é" in text:
-        name = text.split("meu nome é")[-1].strip().capitalize()
-        memory["user_name"] = name
-        save_json(MEMORY_FILE, memory)
-        return f"Ok, {name}"
+Responda em JSON com:
+- type: (action, code, project, answer)
+- steps: lista de etapas
+- tools: quais ferramentas usar
+- output: o que gerar
+"""
 
-    return None
+    response = ask_llm(prompt)
+
+    try:
+        return json.loads(response)
+    except:
+        return {"type": "answer", "steps": [], "output": response}
 
 # ==============================
-# MAIN
+# CODE GENERATOR
+# ==============================
+
+def generate_code(spec):
+    prompt = f"""
+Crie código completo baseado nisso:
+
+{spec}
+
+Regras:
+- Código funcional
+- Estrutura profissional
+- Pode incluir múltiplos arquivos
+- Inclua comentários
+- Código limpo, sem emojis
+"""
+
+    return ask_llm(prompt)
+
+def save_code(project_name, code):
+    path = os.path.join(PROJECTS_DIR, project_name)
+    os.makedirs(path, exist_ok=True)
+
+    file_path = os.path.join(path, "main.py")
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(code)
+
+    return file_path
+
+# ==============================
+# PROJECT BUILDER
+# ==============================
+
+def build_project(user_input):
+    log("Criando projeto...")
+
+    code = generate_code(user_input)
+
+    name = f"project_{int(datetime.now().timestamp())}"
+    path = save_code(name, code)
+
+    memory["projects"].append({
+        "name": name,
+        "path": path,
+        "created": datetime.now().isoformat()
+    })
+
+    save_json(MEMORY_FILE, memory)
+
+    return f"Projeto criado em {path}"
+
+# ==============================
+# SELF UPGRADE 
+# ==============================
+
+def self_improve(user_input):
+    prompt = f"""
+Você é uma IA que melhora seu próprio código.
+
+Baseado nisso:
+{user_input}
+
+Sugira melhorias estruturais no sistema JIMI.
+Retorne código Python atualizado se necessário.
+"""
+
+    improvement = ask_llm(prompt)
+
+    # salva sugestão
+    with open("self_update_log.txt", "a", encoding="utf-8") as f:
+        f.write("\n\n" + improvement)
+
+    return "Sugestões de melhoria registradas."
+
+# ==============================
+# DEPLOY SUGGESTION
+# ==============================
+
+def suggest_deploy(project_type):
+    if "web" in project_type:
+        return "Sugestão: Vercel, Cloudflare Pages, Render"
+    if "api" in project_type:
+        return "Sugestão: AWS, Railway, Render"
+    if "app" in project_type:
+        return "Sugestão: Electron ou Flutter + AWS backend"
+    return "Deploy genérico: Docker + VPS"
+
+# ==============================
+# TASK EXECUTION
+# ==============================
+
+def execute_plan(plan, user_input):
+    t = plan.get("type")
+
+    if t == "action":
+        return execute_action(user_input)
+
+    if t == "code":
+        code = generate_code(user_input)
+        return code[:500]
+
+    if t == "project":
+        result = build_project(user_input)
+        deploy = suggest_deploy(user_input)
+        return f"{result}\n{deploy}"
+
+    return plan.get("output")
+
+# ==============================
+# FALLBACK
+# ==============================
+
+def fallback(user_input):
+    if "oi" in user_input.lower():
+        return "Fala, Senhor."
+    return "Não entendi."
+
+# ==============================
+# MAIN THINK
 # ==============================
 
 def think(user_input):
     if not user_input:
-        return "Sim?"
+        return "Sim, Senhor?"
 
-    # 1. automação
-    intent = extract_intent(user_input)
-    action = execute_intent(intent)
-    if action:
-        return action
+    log("INPUT:", user_input)
 
-    # 2. comandos
-    cmd = handle_commands(user_input)
-    if cmd:
-        return cmd
+    # 1. automação direta
+    try:
+        auto = execute_action(user_input)
+        if auto:
+            return auto
+    except Exception as e:
+        log("Erro automação:", e)
 
-    # 3. IA
-    prompt = build_prompt(user_input)
-    resposta = perguntar_llm(prompt)
+    # 2. planejamento inteligente
+    plan = plan_task(user_input)
 
-    if not resposta:
-        resposta = fallback_response(user_input)
+    log("PLANO:", plan)
 
-    conversation_history.append(f"Jimi: {resposta}")
-    update_memory(user_input, resposta)
+    # 3. execução
+    response = execute_plan(plan, user_input)
 
-    return resposta
+    if not response:
+        response = fallback(user_input)
+
+    # 4. memória
+    memory["history"].append({
+        "time": datetime.now().isoformat(),
+        "user": user_input,
+        "response": response
+    })
+
+    memory["history"] = memory["history"][-50:]
+    save_json(MEMORY_FILE, memory)
+
+    return response

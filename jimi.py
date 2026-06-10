@@ -1,212 +1,162 @@
-import sounddevice as sd
-import numpy as np
-import torch
-import queue
-import time
 import threading
+import traceback
 
-# IA
-from core.brain import think
+# CORE
+from core.planner import plan
+from core.executor import execute
+from core.security import is_safe
 
-def main():
-    print("JIMI iniciado. Digite algo:")
+# MEMÓRIA
+from memory.memory_manager import memory_manager
 
-    while True:
-        user_input = input("Você: ")
+# VOZ
+from voice.voice_engine import speak
+from voice.audio_ai import listen
 
-        if user_input.lower() in ["sair", "exit", "quit"]:
-            break
-
-        resposta = think(user_input)
-        print("Jimi:", resposta)
-
-if __name__ == "__main__":
-    main()
-
-from silero_vad import load_silero_vad, get_speech_timestamps
-import whisper
-import pyttsx3
-
-# ================= CONFIG =================
-
-SAMPLE_RATE = 16000
-BLOCK_SIZE = 1024
-
-SILENCE_LIMIT = 1.0
-MIN_AUDIO_LEN = 0.4
-
-WAKE_WORD = "jimi"  # (temporário - depois Porcupine)
+# WAKE WORD
+from voice.wake_word import detect_wake_word, extract_command
 
 # ================= ESTADO =================
 
-audio_queue = queue.Queue()
-tts_queue = queue.Queue()
-
-ACTIVE_MODE = False
 RUNNING = True
+ACTIVE_MODE = False
 
-# ================= INIT =================
+# ================= LOG =================
 
-print("🔊 Carregando Whisper...")
-whisper_model = whisper.load_model("base")
+def log(*args):
+    print("[JIMI]", *args)
 
-print("🧠 Carregando VAD...")
-vad_model = load_silero_vad()
+# ================= PROCESSAMENTO CENTRAL =================
 
-print("🔈 Inicializando voz...")
-engine = pyttsx3.init()
-engine.setProperty("rate", 185)
-
-# ================= TTS =================
-
-def tts_worker():
-    while RUNNING:
-        text = tts_queue.get()
-        if text:
-            print("🤖:", text)
-            engine.say(text)
-            engine.runAndWait()
-
-def speak(text):
-    tts_queue.put(text)
-
-threading.Thread(target=tts_worker, daemon=True).start()
-
-# ================= VAD =================
-
-def detect_speech(audio):
-    audio = audio.flatten()
-    audio_tensor = torch.from_numpy(audio).float()
-
-    speech = get_speech_timestamps(
-        audio_tensor,
-        vad_model,
-        sampling_rate=SAMPLE_RATE
-    )
-
-    return len(speech) > 0
-
-# ================= TRANSCRIÇÃO =================
-
-def transcribe(audio):
-    audio_np = audio.flatten().astype(np.float32) / 32768.0
-
-    result = whisper_model.transcribe(
-        audio_np,
-        language="pt",
-        fp16=False
-    )
-
-    return result["text"].strip().lower()
-
-# ================= PROCESSAMENTO =================
-
-def process_audio(audio):
-    global ACTIVE_MODE
-
+def process_input(user_input: str) -> str:
     try:
-        text = transcribe(audio)
+        # segurança
+        if not is_safe(user_input):
+            return "Esse comando não é permitido"
 
-        if not text:
-            return
+        # memória aprende
+        memory_manager.extract_info(user_input)
 
-        print("🧠 Você disse:", text)
+        # planejamento
+        action = plan(user_input)
 
-        # ================= WAKE WORD =================
+        # execução
+        if action:
+            result = execute(action)
+        else:
+            result = "Ainda estou aprendendo isso"
 
-        if WAKE_WORD in text:
-            ACTIVE_MODE = True
-            speak("Sim?")
-            return
+        # salvar histórico
+        memory_manager.add_interaction(user_input, result)
 
-        if not ACTIVE_MODE:
-            return
-
-        # ================= DESATIVAR =================
-
-        if any(cmd in text for cmd in ["parar", "fica quieto", "desativar"]):
-            ACTIVE_MODE = False
-            speak("Modo silencioso ativado")
-            return
-
-        # ================= IA =================
-
-        response = think(text)
-
-        if response:
-            speak(response)
+        return result
 
     except Exception as e:
-        print("❌ Erro processamento:", e)
+        log("Erro crítico:", e)
+        traceback.print_exc()
+        return "Tive um erro interno"
 
-# ================= AUDIO =================
+# ================= CALLBACK DE VOZ =================
 
-def audio_callback(indata, frames, time_info, status):
-    if status:
-        print("⚠️ Audio:", status)
+def on_speech(text: str):
+    global ACTIVE_MODE
 
-    audio_queue.put(indata.copy())
+    if not text:
+        return
 
-# ================= LISTENER =================
+    text = text.lower()
+    log(f"Você disse: {text}")
 
-def listener_loop():
-    print("🎤 Jimi ativo (modo contínuo)")
+    # WAKE WORD
+    if detect_wake_word(text):
+        ACTIVE_MODE = True
+        speak("Sim?")
+        return
 
-    buffer = []
-    speaking = False
-    last_voice = time.time()
-    start_time = None
+    # ignora se não estiver ativo
+    if not ACTIVE_MODE:
+        return
+
+    # desativar
+    if any(cmd in text for cmd in ["parar", "fica quieto", "desativar", "silêncio"]):
+        ACTIVE_MODE = False
+        speak("Modo silencioso ativado")
+        return
+
+    # extrai comando
+    command = extract_command(text)
+
+    if not command:
+        speak("Pode repetir?")
+        return
+
+    response = process_input(command)
+
+    if response:
+        speak(response)
+
+# ================= MODO TEXTO =================
+
+def cli_loop():
+    global RUNNING
+
+    print("💻 Modo texto ativo (digite 'sair' para encerrar)\n")
 
     while RUNNING:
-        data = audio_queue.get()
+        try:
+            user_input = input("Você: ")
 
-        if detect_speech(data):
+            if user_input.lower() in ["sair", "exit", "quit"]:
+                shutdown()
+                break
 
-            if not speaking:
-                speaking = True
-                buffer = []
-                start_time = time.time()
-                print("🟢 Fala iniciada")
+            response = process_input(user_input)
 
-            buffer.append(data)
-            last_voice = time.time()
+            print("Jimi:", response)
+            speak(response)
 
-        else:
-            if speaking and (time.time() - last_voice > SILENCE_LIMIT):
+        except Exception as e:
+            log("Erro no CLI:", e)
 
-                duration = time.time() - start_time
+# ================= VOZ =================
 
-                if duration > MIN_AUDIO_LEN:
-                    print("🔴 Processando...")
+def start_voice():
+    try:
+        listen(on_speech_detected=on_speech)
+    except Exception as e:
+        log("Erro na voz:", e)
 
-                    audio = np.concatenate(buffer, axis=0)
+# ================= CONTROLE =================
 
-                    threading.Thread(
-                        target=process_audio,
-                        args=(audio,),
-                        daemon=True
-                    ).start()
+def shutdown():
+    global RUNNING
+    RUNNING = False
+    print("\n🛑 Encerrando JIMI...")
 
-                speaking = False
-                buffer = []
+# ================= MAIN =================
 
-# ================= START =================
+def main():
+    print("""
+🤖 =========================
+        JIMI ONLINE
+=========================
+Modo híbrido:
+- Voz (wake word: Jimi)
+- Texto simultâneo
+=========================
+""")
 
-def start():
-    stream = sd.InputStream(
-        callback=audio_callback,
-        channels=1,
-        samplerate=SAMPLE_RATE,
-        blocksize=BLOCK_SIZE
-    )
+    # thread de voz
+    voice_thread = threading.Thread(target=start_voice, daemon=True)
+    voice_thread.start()
 
-    with stream:
-        listener_loop()
+    # loop principal
+    cli_loop()
 
 # ================= RUN =================
 
 if __name__ == "__main__":
     try:
-        start()
+        main()
     except KeyboardInterrupt:
-        print("\n🛑 Encerrando Jimi...")
+        shutdown()

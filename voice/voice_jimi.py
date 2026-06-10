@@ -5,8 +5,12 @@ import queue
 import time
 import threading
 import whisper
-import pyttsx3
+
 from silero_vad import load_silero_vad, get_speech_timestamps
+
+# INTEGRAÇÕES
+from audio_ai import speak
+from jimi.brain import process_command  # <- você vai implementar depois
 
 # ================= CONFIG =================
 
@@ -16,12 +20,15 @@ BLOCK_SIZE = 1024
 SILENCE_LIMIT = 1.0
 MIN_AUDIO_LEN = 0.4
 
+WAKE_WORDS = ["jimi", "jimmy", "gmi"]
+
 # ================= ESTADO =================
 
 audio_queue = queue.Queue()
-tts_queue = queue.Queue()
-
 RUNNING = True
+
+is_processing = False
+lock = threading.Lock()
 
 # ================= INIT =================
 
@@ -31,24 +38,14 @@ whisper_model = whisper.load_model("base")
 print("🧠 Carregando VAD...")
 vad_model = load_silero_vad()
 
-print("🔈 Inicializando TTS...")
-engine = pyttsx3.init()
-engine.setProperty("rate", 185)
+# ================= UTIL =================
 
-# ================= TTS =================
+from wake_word import detect_wake_word, extract_command
 
-def tts_worker():
-    while RUNNING:
-        text = tts_queue.get()
-        if text:
-            print("🤖:", text)
-            engine.say(text)
-            engine.runAndWait()
-
-def speak(text):
-    tts_queue.put(text)
-
-threading.Thread(target=tts_worker, daemon=True).start()
+def clean_command(text):
+    for w in WAKE_WORDS:
+        text = text.replace(w, "")
+    return text.strip()
 
 # ================= VAD =================
 
@@ -82,7 +79,7 @@ def transcribe(audio):
         print("❌ Erro transcrição:", e)
         return ""
 
-# ================= PIPELINE DE CAPTURA =================
+# ================= AUDIO CALLBACK =================
 
 def audio_callback(indata, frames, time_info, status):
     if status:
@@ -90,16 +87,43 @@ def audio_callback(indata, frames, time_info, status):
 
     audio_queue.put(indata.copy())
 
+# ================= PROCESSAMENTO =================
+
+def handle_text(text):
+    global is_processing
+
+    with lock:
+        if is_processing:
+            print("⏳ Já processando, ignorando...")
+            return
+        is_processing = True
+
+    try:
+        print("🧠 Você disse:", text)
+
+        # WAKE WORD
+        if not is_wake_word(text):
+            return
+
+        command = clean_command(text)
+
+        if not command:
+            speak("Pode falar.")
+            return
+
+        # PROCESSAMENTO CENTRAL (brain.py)
+        response = process_command(command)
+
+        if response:
+            speak(response)
+
+    finally:
+        is_processing = False
+
 # ================= LISTENER =================
 
-def listen(on_speech_detected):
-    """
-    Loop principal de escuta.
-    Quando detectar fala válida, chama:
-    on_speech_detected(texto)
-    """
-
-    print("🎤 Módulo de voz ativo")
+def listen():
+    print("🎤 JIMI ouvindo...")
 
     buffer = []
     speaking = False
@@ -139,22 +163,21 @@ def listen(on_speech_detected):
                         audio = np.concatenate(buffer, axis=0)
 
                         threading.Thread(
-                            target=process_and_callback,
-                            args=(audio, on_speech_detected),
+                            target=process_audio,
+                            args=(audio,),
                             daemon=True
                         ).start()
 
                     speaking = False
                     buffer = []
 
-# ================= PROCESSAMENTO =================
+# ================= PIPELINE =================
 
-def process_and_callback(audio, callback):
+def process_audio(audio):
     text = transcribe(audio)
 
     if text:
-        print("🧠 Você disse:", text)
-        callback(text)
+        handle_text(text)
 
 # ================= CONTROLE =================
 
