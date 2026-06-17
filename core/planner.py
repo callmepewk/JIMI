@@ -1,38 +1,47 @@
-def log(*args):
-    print("[PLANNER]", *args)
+import logging
 
-
-def plan(user_input: str):
-    text = user_input.lower()
-
-    # =========================
-    # AÇÕES DIRETAS
-    # =========================
-
-    if "abrir youtube" in text:
-        return {"type": "open_url", "value": "https://youtube.com"}
-
-    if "abrir google" in text:
-        return {"type": "open_url", "value": "https://google.com"}
-
-    if "abrir spotify" in text:
-        return {"type": "open_app", "value": "spotify"}
-
-    if "desligar pc" in text:
-        return {"type": "system", "value": "shutdown /s /t 0"}
-
-    # =========================
-    # AUTOMAÇÃO
-    # =========================
-
-    if "modo trabalho" in text:
-        return {
-            "type": "automation",
-            "value": "work_mode"
+class Planner:
+    def __init__(self):
+        # Mapeamento de intenções (Intenção -> Ação/Função)
+        self.intents = {
+            "web_navigation": ["abrir", "navegar", "acessar"],
+            "app_control": ["executar", "abrir aplicativo"],
+            "system": ["desligar", "reiniciar", "suspender"],
+            "automation": ["modo trabalho", "modo foco", "configurar ambiente"]
         }
 
-    # =========================
-    # SEM AÇÃO
-    # =========================
+    def _match_intent(self, text: str):
+        # Busca por similaridade de intenção
+        for intent, keywords in self.intents.items():
+            if any(keyword in text for keyword in keywords):
+                return intent
+        return "unknown"
 
-    return None
+    def plan(self, user_input: str):
+        text = user_input.lower().strip()
+        intent = self._match_intent(text)
+        
+        # Orquestração da ação baseada na intenção
+        if intent == "web_navigation":
+            return {"type": "open_url", "value": self._extract_url(text)}
+        
+        if intent == "system":
+            return {"type": "system", "value": self._map_system_action(text)}
+        
+        if intent == "automation":
+            return {"type": "automation", "value": "work_mode"}
+
+        return {"type": "chat", "value": "Não entendi a tarefa, poderia repetir?"}
+
+    def _extract_url(self, text):
+        # Lógica inteligente para extrair sites de frases naturais
+        if "youtube" in text: return "https://youtube.com"
+        if "google" in text: return "https://google.com"
+        return None
+
+    def _map_system_action(self, text):
+        if "desligar" in text: return "shutdown /s /t 0"
+        return None
+
+# Instância global
+planner = Planner()

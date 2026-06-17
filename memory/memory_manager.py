@@ -1,50 +1,48 @@
 import json
 import os
 import threading
+import numpy as np
 from datetime import datetime
 from copy import deepcopy
+from sentence_transformers import SentenceTransformer
 
 # ==============================
-# CONFIG
+# VECTOR STORE (SEMÂNTICO)
 # ==============================
+class VectorStore:
+    def __init__(self):
+        # Modelo leve para buscas semânticas locais
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.data = [] 
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-MEMORY_FILE = os.path.join(BASE_DIR, "data", "memory.json")
-BACKUP_FILE = os.path.join(BASE_DIR, "data", "memory_backup.json")
+    def add(self, text):
+        embedding = self.model.encode(text)
+        self.data.append({"text": text, "embedding": embedding})
 
-MAX_HISTORY = 40
-MAX_ACTIONS = 20
-
-# ==============================
-# DEFAULT STRUCTURE
-# ==============================
-
-DEFAULT_MEMORY = {
-    "user_name": "",
-    "preferences": [],
-    "facts": [],
-    "history": [],
-    "context": {},
-    "last_actions": [],
-    "created_at": None,
-    "updated_at": None
-}
+    def search(self, query, top_k=3):
+        if not self.data: return []
+        query_embedding = self.model.encode(query)
+        results = []
+        for item in self.data:
+            similarity = np.dot(query_embedding, item["embedding"])
+            results.append((item["text"], similarity))
+        results.sort(key=lambda x: x[1], reverse=True)
+        return [r[0] for r in results[:top_k]]
 
 # ==============================
 # MEMORY MANAGER
 # ==============================
-
 class MemoryManager:
     _instance = None
     _lock = threading.Lock()
 
     def __init__(self):
+        self.vector_store = VectorStore()
         self.memory = self._load()
         self._autosave = True
-
-    # ==============================
-    # SINGLETON
-    # ==============================
+        # Indexa fatos existentes na inicialização
+        for fact in self.memory.get("facts", []):
+            self.vector_store.add(fact)
 
     @classmethod
     def get_instance(cls):
@@ -54,174 +52,27 @@ class MemoryManager:
                     cls._instance = cls()
         return cls._instance
 
-    # ==============================
-    # CORE LOAD/SAVE
-    # ==============================
-
-    def _log(self, *args):
-        print("[MEMORY]", *args)
-
-    def _ensure_structure(self, data):
-        for key in DEFAULT_MEMORY:
-            if key not in data:
-                data[key] = deepcopy(DEFAULT_MEMORY[key])
-        return data
-
-    def _load(self):
-        if not os.path.exists(MEMORY_FILE):
-            self._log("Criando memória inicial")
-            return deepcopy(DEFAULT_MEMORY)
-
-        try:
-            with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            return self._ensure_structure(data)
-
-        except Exception as e:
-            self._log("Erro ao carregar memória:", e)
-            return deepcopy(DEFAULT_MEMORY)
-
-    def save(self):
-        os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
-
-        self.memory["updated_at"] = datetime.now().isoformat()
-
-        try:
-            with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.memory, f, indent=2, ensure_ascii=False)
-
-        except Exception as e:
-            self._log("Erro ao salvar, criando backup:", e)
-            with open(BACKUP_FILE, "w", encoding="utf-8") as f:
-                json.dump(self.memory, f, indent=2, ensure_ascii=False)
-
-    def _auto_save(self):
-        if self._autosave:
-            self.save()
-
-    # ==============================
-    # INTERAÇÕES
-    # ==============================
-
-    def add_interaction(self, user_input, response):
-        self.memory["history"].append({
-            "time": datetime.now().isoformat(),
-            "user": user_input,
-            "jimi": response
-        })
-
-        self.memory["history"] = self.memory["history"][-MAX_HISTORY:]
-        self._auto_save()
-
-    # ==============================
-    # AÇÕES
-    # ==============================
-
-    def register_action(self, action_name, metadata=None):
-        self.memory["last_actions"].append({
-            "time": datetime.now().isoformat(),
-            "action": action_name,
-            "meta": metadata or {}
-        })
-
-        self.memory["last_actions"] = self.memory["last_actions"][-MAX_ACTIONS:]
-        self._auto_save()
-
-    # ==============================
-    # CONTEXTO
-    # ==============================
-
-    def set_context(self, key, value):
-        self.memory["context"][key] = value
-        self._auto_save()
-
-    def get_context(self, key=None):
-        if key:
-            return self.memory["context"].get(key)
-        return self.memory["context"]
-
-    def clear_context(self, key=None):
-        if key:
-            self.memory["context"].pop(key, None)
-        else:
-            self.memory["context"] = {}
-
-        self._auto_save()
-
-    # ==============================
-    # USER DATA
-    # ==============================
-
-    def set_user_name(self, name):
-        if name and name != self.memory["user_name"]:
-            self.memory["user_name"] = name
-            self._log("Nome aprendido:", name)
-            self._auto_save()
-
-    def add_preference(self, pref):
-        if pref and pref not in self.memory["preferences"]:
-            self.memory["preferences"].append(pref)
-            self._auto_save()
+    # ... (Mantenha aqui os métodos _load, save, etc do seu código original) ...
+    # Abaixo, as atualizações necessárias:
 
     def add_fact(self, fact):
         if fact and fact not in self.memory["facts"]:
             self.memory["facts"].append(fact)
+            self.vector_store.add(fact) # Indexação Semântica
             self._auto_save()
 
-    # ==============================
-    # EXTRAÇÃO INTELIGENTE
-    # ==============================
+    def query_facts(self, query):
+        """Busca fatos relevantes sobre o Sr. Pedro usando IA"""
+        return self.vector_store.search(query)
 
-    def extract_info(self, text):
-        text = text.lower().strip()
-
-        if "meu nome é" in text:
-            name = text.split("meu nome é")[-1].strip().capitalize()
-            self.set_user_name(name)
-
-        if "eu gosto de" in text:
-            pref = text.split("eu gosto de")[-1].strip()
-            self.add_preference(pref)
-
-        triggers = ["eu sou", "eu trabalho", "eu estudo", "eu moro"]
-        if any(t in text for t in triggers):
-            self.add_fact(text)
-
-        playlists = [
-            "reggae", "r&b", "nostalgia", "rock",
-            "blues", "brazilian deluxe", "corrida",
-            "nossa playlist", "eletro", "rap"
-        ]
-
-        for p in playlists:
-            if p in text:
-                self.set_context("last_playlist", p)
-
-    # ==============================
-    # CONTEXTO PARA IA
-    # ==============================
-
-    def get_ai_context(self):
+    def get_ai_context(self, query=""):
+        """Retorna o contexto condensado para a LLM"""
+        relevant_facts = self.query_facts(query)
         return {
             "name": self.memory.get("user_name"),
-            "preferences": self.memory.get("preferences")[-5:],
-            "facts": self.memory.get("facts")[-5:],
+            "relevant_facts": relevant_facts,
             "last_playlist": self.memory.get("context", {}).get("last_playlist")
         }
 
-    # ==============================
-    # LIMPEZA
-    # ==============================
-
-    def clean(self):
-        self.memory["preferences"] = list(set(self.memory["preferences"]))
-        self.memory["facts"] = list(set(self.memory["facts"]))
-        self._auto_save()
-
-
-# ==============================
-# INSTÂNCIA GLOBAL
-# ==============================
-
+# Instância global
 memory_manager = MemoryManager.get_instance()

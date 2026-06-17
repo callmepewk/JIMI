@@ -1,0 +1,7 @@
+# Pastas e arquivos sensíveis
+services/credentials.json
+services/token.json
+data/*.json
+__pycache__/
+.env
+.DS_Store

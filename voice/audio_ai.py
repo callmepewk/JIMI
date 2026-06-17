@@ -1,130 +1,21 @@
-import pyttsx3
-import threading
-import queue
-import time
-
-# ==============================
-# CONFIG
-# ==============================
-
-VOICE_RATE = 185
-VOICE_VOLUME = 1.0
-VOICE_ID = None  # pode definir depois
-
-DEBUG = True
-
-# ==============================
-# ENGINE
-# ==============================
-
-engine = pyttsx3.init()
-
-def log(*args):
-    if DEBUG:
-        print("[AUDIO]", *args)
-
-def setup_voice():
-    global engine
-
-    voices = engine.getProperty('voices')
-
-    # 🔥 tenta escolher voz mais natural
-    if VOICE_ID:
-        engine.setProperty('voice', VOICE_ID)
-    else:
-        for v in voices:
-            if "brazil" in v.name.lower() or "portuguese" in v.name.lower():
-                engine.setProperty('voice', v.id)
-                break
-
-    engine.setProperty('rate', VOICE_RATE)
-    engine.setProperty('volume', VOICE_VOLUME)
-
-setup_voice()
-
-# ==============================
-# FILA DE ÁUDIO (NÃO BLOQUEANTE)
-# ==============================
-
-speech_queue = queue.Queue()
-is_speaking = False
-stop_signal = False
-
-def _speech_worker():
-    global is_speaking, stop_signal
-
-    while True:
-        text = speech_queue.get()
-
-        if text is None:
-            continue
-
-        try:
-            is_speaking = True
-            log("Falando:", text)
-
-            engine.say(text)
-            engine.runAndWait()
-
-        except Exception as e:
-            log("Erro TTS:", e)
-
-        finally:
-            is_speaking = False
-            speech_queue.task_done()
-
-# thread separada (ESSENCIAL)
-threading.Thread(target=_speech_worker, daemon=True).start()
-
-# ==============================
-# API PRINCIPAL
-# ==============================
+"""
+Interface de alto nível para o sistema de voz do JIMI.
+Redireciona as chamadas para o motor central (voice_engine).
+"""
+from voice_engine import speak as engine_speak, stop as engine_stop, is_busy as engine_is_busy
 
 def speak(text, interrupt=False):
-    global stop_signal
-
-    if not text:
-        return
-
-    # 🔥 se quiser interromper fala atual
-    if interrupt:
-        stop()
-
-    speech_queue.put(text)
-
-# ==============================
-# CONTROLE
-# ==============================
+    """
+    Função principal para o JIMI falar.
+    :param text: O texto a ser falado.
+    :param interrupt: Se True, interrompe a fala atual antes de começar a próxima.
+    """
+    engine_speak(text, interrupt=interrupt)
 
 def stop():
-    global stop_signal
+    """Interrompe a fala atual do JIMI imediatamente."""
+    engine_stop()
 
-    try:
-        engine.stop()
-        log("Fala interrompida")
-    except:
-        pass
-
-
-def is_busy():
-    return is_speaking
-
-
-def wait_until_done():
-    speech_queue.join()
-
-# ==============================
-# CONFIG DINÂMICA
-# ==============================
-
-def set_rate(rate):
-    engine.setProperty('rate', rate)
-
-
-def set_volume(volume):
-    engine.setProperty('volume', volume)
-
-
-def list_voices():
-    voices = engine.getProperty('voices')
-    return [(v.id, v.name) for v in voices]
+def is_speaking():
+    """Retorna True se o JIMI estiver falando no momento."""
+    return engine_is_busy()
