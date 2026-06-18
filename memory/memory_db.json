@@ -1,0 +1,63 @@
+{
+    "user_name": "Sr. Pedro",
+    "facts": [],
+    "context": {},
+    "interactions": [
+        {
+            "timestamp": "2026-06-17T15:02:19.522180",
+            "type": "chat_interaction",
+            "details": {
+                "user": "ola jimi",
+                "jimi": "Olá, Sr. Pedro! Estou aqui e pronto para atender às suas necessidades. O sistema está online e com memória vazia, esperando para armazenar novos fatos históricos relevantes. Qual é o seu objetivo para hoje?"
+            }
+        },
+        {
+            "timestamp": "2026-06-17T17:46:24.191470",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Olá, JIMI. Você está operacional?",
+                "jimi": "Compreendido, Sr. Pedro. No momento, meu motor cognitivo central local (Ollama) está offline."
+            }
+        },
+        {
+            "timestamp": "2026-06-17T17:59:41.571043",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Olá, JIMI. Você está operacional?",
+                "jimi": "Olá, Sr. Pedro! Estou operando em capacidade máxima e pronto para atender às suas necessidades. O ambiente operacional está funcionando perfeitamente, e eu estou à sua disposição. Qual é o seu objetivo para hoje?"
+            }
+        },
+        {
+            "timestamp": "2026-06-18T18:55:13.429539",
+            "type": "chat_interaction",
+            "details": {
+                "user": "juros nosso lágrimas 40",
+                "jimi": "Compreendido, Sr. Pedro. No momento, meu motor cognitivo central local (Ollama) está offline."
+            }
+        },
+        {
+            "timestamp": "2026-06-18T18:58:06.207971",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Jimmy você nego",
+                "jimi": "Compreendido, Sr. Pedro. No momento, meu motor cognitivo central local (Ollama) está offline."
+            }
+        },
+        {
+            "timestamp": "2026-06-18T18:58:31.203174",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Olá Jimi! Sou seu criador, Pedro Henrique Brezolin de Freitas, sou CTO, seu nome é uma homenagem ao Jimi Hendrix",
+                "jimi": "Compreendido, Sr. Pedro. No momento, meu motor cognitivo central local (Ollama) está offline."
+            }
+        },
+        {
+            "timestamp": "2026-06-18T18:59:06.207424",
+            "type": "chat_interaction",
+            "details": {
+                "user": "o motor cognitivo central de imitar desligado",
+                "jimi": "Sr. Pedro, recebi sua mensagem e gostaria de informá-lo que o motor cognitivo central de imitar está desativado. Isso significa que não estarei mais capaz de processar informações e replicar padrões de linguagem observados pelo criador. Por favor, considere reativá-lo para que possamos melhorar a comunicação e efetuar ajustes necessários."
+            }
+        }
+    ]
+}

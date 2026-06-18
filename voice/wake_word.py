@@ -1,49 +1,90 @@
 import os
-import struct
+import logging
+import glob
 import pvporcupine
 from pvrecorder import PvRecorder
 
+logger = logging.getLogger("JIMI.WakeWord")
+
 class WakeWordEngine:
-    def __init__(self, access_key, model_path=None, keyword_paths=None):
+    def __init__(self):
         """
-        access_key: Sua chave obtida no console.picovoice.ai
+        Engine de ativação ultra-leve via Picovoice Porcupine.
+        Autodetecta chaves de ambiente e arquivos de modelo (.ppn).
         """
-        self.porcupine = pvporcupine.create(
-            access_key=access_key,
-            keyword_paths=keyword_paths
-        )
+        # 1. Resolução da Access Key (Var de ambiente -> Fallback Hardcoded)
+        self.access_key = os.getenv("PICOVOICE_ACCESS_KEY", "SUA_ACCESS_KEY_AQUI")
+        
+        if self.access_key == "SUA_ACCESS_KEY_AQUI" or not self.access_key:
+            raise ValueError(
+                "\n[ERRO CRÍTICO] Chave do Picovoice não configurada!\n"
+                "Defina a variável de ambiente 'PICOVOICE_ACCESS_KEY' ou edite o arquivo config."
+            )
+
+        # 2. Varredura Automática de arquivos .ppn na pasta local 'voice/'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        ppn_files = glob.glob(os.path.join(current_dir, "*.ppn"))
+
+        if ppn_files:
+            # Seleciona o primeiro arquivo customizado encontrado (ex: jimi.ppn)
+            self.keyword_path = ppn_files[0]
+            logger.info(f"[PORCUPINE] Modelo customizado autodetectado: {os.path.basename(self.keyword_path)}")
+            self.porcupine = pvporcupine.create(
+                access_key=self.access_key, 
+                keyword_paths=[self.keyword_path]
+            )
+        else:
+            # Caso não tenha gerado o .ppn ainda, usa o fallback nativo estável
+            logger.warning("[PORCUPINE] Nenhum arquivo .ppn achado em /voice. Usando keyword nativa 'jarvis'.")
+            self.porcupine = pvporcupine.create(
+                access_key=self.access_key, 
+                keywords=['jarvis']
+            )
+            
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.is_running = False
 
-    def start(self, callback_on_wake):
-        self.recorder.start()
-        self.is_running = True
-        print("JIMI: Wake word engine ativa e escutando...")
-
+    def listen_for_wake(self) -> bool:
+        """Bloqueia a execução e escuta o ambiente até detectar a wake word."""
         try:
+            self.recorder.start()
+            self.is_running = True
+            
             while self.is_running:
                 pcm = self.recorder.read()
                 result = self.porcupine.process(pcm)
 
                 if result >= 0:
-                    callback_on_wake()
-        except KeyboardInterrupt:
-            self.stop()
+                    logger.info("[PORCUPINE] Gatilho de voz disparado!")
+                    self.stop_recorder()
+                    return True
+        except Exception as e:
+            logger.error(f"[PORCUPINE ERROR] Falha no loop de escuta passiva: {e}")
+            self.stop_recorder()
+        return False
 
-    def stop(self):
-        self.is_running = False
-        self.recorder.stop()
-        self.recorder.delete()
-        self.porcupine.delete()
+    def stop_recorder(self):
+        """Para temporariamente o gravador para liberar o microfone para o Whisper."""
+        if self.is_running:
+            self.is_running = False
+            try:
+                self.recorder.stop()
+            except Exception:
+                pass
 
-# --- Integração com o fluxo do sistema ---
-def on_wake_detected():
-    print("JIMI: Sim, Sr. Pedro? O que o senhor deseja?")
-    # Aqui chamaremos a função de reconhecimento de voz (Speech-to-Text)
-    # que passará o comando para o automation.py
+    def release(self):
+        """Destrói as instâncias de hardware do Picovoice ao encerrar o sistema."""
+        try:
+            self.stop_recorder()
+            self.recorder.delete()
+            self.porcupine.delete()
+            logger.info("[PORCUPINE] Recursos de hardware liberados.")
+        except Exception:
+            pass
 
-if __name__ == "__main__":
-    # A chave de acesso é gratuita no site da Picovoice
-    ACCESS_KEY = "SUA_ACCESS_KEY_AQUI"
-    engine = WakeWordEngine(ACCESS_KEY)
-    engine.start(on_wake_detected)
+# Inicialização global segura da instância
+try:
+    wake_engine = WakeWordEngine()
+except Exception as err:
+    logger.error(f"Falha ao subir subsistema Porcupine: {err}")
+    wake_engine = None

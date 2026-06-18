@@ -1,17 +1,21 @@
-import subprocess
-import webbrowser
 import logging
-from automation.automation import run_automation
-from memory.memory_manager import memory_manager
-from security.security_manager import security_manager
+from services.services_manager import services_manager
 
-# Configuração de log para auditoria (Essencial para Jarvis)
-logging.basicConfig(level=logging.INFO)
+# --- ISOLAMENTO DE IMPORTS EM CAMADAS DEFENSIVAS ---
+# Mantemos apenas o que é estritamente necessário para a tomada de decisão do executor
+try:
+    from memory.memory_manager import memory_manager
+    from core.security import security_manager
+except Exception as e:
+    logging.error(f"[EXECUTOR] Módulos auxiliares de segurança/memória offline: {e}")
+    memory_manager = None
+    security_manager = None
+
 logger = logging.getLogger("JIMI.Executor")
 
 def execute(action: dict):
     """
-    Executor de alto nível com validação de segurança e auditoria.
+    O Executor agora foca apenas em: Validar Segurança -> Registrar na Memória -> Delegar ao Hub.
     """
     if not action or "type" not in action:
         return "Comando inválido."
@@ -20,42 +24,29 @@ def execute(action: dict):
     value = action.get("value")
     meta = action.get("meta", {})
 
-    # 1. Auditoria e Segurança (Camada Vital)
-    # Verificamos se a ação proposta é segura antes de tocar no sistema
-    security_check = security_manager.is_safe(f"{action_type}:{value}")
-    if not security_check["safe"]:
-        logger.error(f"Execução bloqueada: {action_type} - {value}")
+    # 1. Auditoria de Segurança
+    if security_manager and not security_manager.is_safe(f"{action_type}:{value}").get("safe", False):
         return "Protocolo de segurança: Ação não autorizada."
 
+# 2. Execução (Delegando ao Hub de Serviços ou Motor de Build)
+    logger.info(f"[EXECUTOR] Despachando diretiva: {action_type} | Valor: {value}")
+
     try:
-        logger.info(f"Executando: {action_type} | Valor: {value}")
-
-        if action_type == "open_url":
-            webbrowser.open(value)
-            memory_manager.register_action("open_url", {"url": value})
-            return f"Abrindo {value.split('//')[-1]}"
-
-        elif action_type == "open_app":
-            # Uso de lista para evitar shell=True (Mais seguro)
-            subprocess.Popen([value], shell=False) 
-            memory_manager.register_action("open_app", {"app": value})
-            return f"Iniciando {value}"
-
-        elif action_type == "automation":
-            # O Executor delega a lógica complexa para o módulo de automação
-            result = run_automation(value, meta)
-            memory_manager.register_action("automation", {"name": value})
-            return result
-
-        elif action_type == "system":
-            # Comando de sistema requer log detalhado
-            subprocess.run(value, shell=True, check=True)
-            memory_manager.register_action("system_cmd", {"cmd": value})
-            return "Comando de sistema concluído."
-
-        else:
-            return f"Tipo de ação {action_type} não implementado."
+        # --- NOVO: Roteamento para o BuilderEngine ---
+        if action_type == "build_task":
+            from core.builder_engine import builder_engine
+            return builder_engine.add_task(task_name=value, meta=meta)
+            
+        # --- MANTIDO: Roteamento original para hardware/serviços ---
+        payload = {"value": value, "meta": meta}
+        result = services_manager.execute_task(action_type, action_name=value, payload=payload)
+        
+        # 3. Registro na Memória (Opcional, mas recomendado)
+        if memory_manager:
+            memory_manager.register_action(action_type, {"value": value, "result": result})
+            
+        return result
 
     except Exception as e:
-        logger.error(f"Falha na execução: {e}")
-        return "Houve um erro técnico ao processar a solicitação."
+        logger.error(f"[EXECUTOR] Falha crítica na execução de {action_type}: {e}")
+        return f"Erro técnico ao processar: {e}"

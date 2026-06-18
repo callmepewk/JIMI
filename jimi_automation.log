@@ -1,0 +1,67 @@
+2026-06-17 11:50:44,108 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 11:52:05,078 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 11:52:21,814 - JIMI.Core - INFO - Comando enfileirado: 'Está ai Jimi?'
+2026-06-17 12:06:12,169 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 12:07:06,901 - JIMI.Core - INFO - Comando enfileirado: 'Está ai Jimi?'
+2026-06-17 12:07:06,901 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'está ai jimi?'
+2026-06-17 12:07:30,644 - JIMI.Core - ERROR - Erro ao processar pensamento no cérebro: [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:10:53,602 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 12:11:06,860 - JIMI.Core - INFO - Comando enfileirado: 'Onde voce está Jimi?'
+2026-06-17 12:11:06,861 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'onde voce está jimi?'
+2026-06-17 12:11:11,883 - JIMI.Core - ERROR - Erro ao processar pensamento no cérebro: [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:15:30,543 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 12:16:08,265 - JIMI.Core - INFO - Comando enfileirado: 'olá jimi, tudo bem?'
+2026-06-17 12:16:08,265 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'olá jimi, tudo bem?'
+2026-06-17 12:16:12,263 - JIMI.Core - ERROR - Erro ao processar pensamento no cérebro: [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:18:48,649 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 12:19:13,645 - JIMI.Core - INFO - Comando enfileirado: 'Olá Jimi'
+2026-06-17 12:19:13,645 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'olá jimi'
+2026-06-17 12:19:16,698 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar memory_manager (conflito de DLL/Torch): [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:19:16,706 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar executor: cannot import name 'run_automation' from 'automation.automation' (C:\Users\pedro\OneDrive\Desktop\JIMI\automation\automation.py)
+2026-06-17 12:19:16,706 - JIMI.Brain - INFO - Processando entrada na IA: olá jimi
+2026-06-17 12:19:16,706 - JIMI.Brain - WARNING - Ignorando extração de memória: módulo em modo de fallback.
+2026-06-17 12:19:16,707 - JIMI.Brain - INFO - Enviando requisição HTTP para o Ollama em http://127.0.0.1:11434/api/generate...
+2026-06-17 12:19:36,720 - JIMI.Brain - WARNING - Ollama inacessível via API: HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=20)
+2026-06-17 12:21:49,896 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 12:21:55,253 - JIMI.Core - INFO - Comando enfileirado: 'ola jimi'
+2026-06-17 12:21:55,253 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'ola jimi'
+2026-06-17 12:21:58,348 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar memory_manager (conflito de DLL/Torch): [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:21:58,972 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar executor: [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:21:58,973 - JIMI.Brain - INFO - Processando entrada na IA: ola jimi
+2026-06-17 12:21:58,973 - JIMI.Brain - WARNING - Ignorando extração de memória: módulo em modo de fallback.
+2026-06-17 12:21:58,973 - JIMI.Brain - INFO - Enviando requisição HTTP para o Ollama em http://127.0.0.1:11434/api/generate...
+2026-06-17 12:22:18,991 - JIMI.Brain - WARNING - Ollama inacessível via API: HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=20)
+2026-06-17 12:29:53,848 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 12:29:57,709 - JIMI.Core - INFO - Comando enfileirado: 'ola jimi'
+2026-06-17 12:29:57,710 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'ola jimi'
+2026-06-17 12:30:01,577 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar memory_manager (conflito de DLL/Torch): [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:30:02,193 - JIMI.Executor - ERROR - [FALLBACK] Módulo de memória indisponível no Executor: [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 12:30:02,195 - JIMI.Executor - ERROR - [FALLBACK] Módulo de segurança indisponível no Executor: No module named 'security'
+2026-06-17 12:30:02,195 - JIMI.Brain - INFO - Processando entrada na IA: ola jimi
+2026-06-17 12:30:02,195 - JIMI.Brain - WARNING - Ignorando extração de memória: módulo em modo de fallback.
+2026-06-17 12:30:02,195 - JIMI.Brain - INFO - Enviando requisição HTTP para o Ollama em http://127.0.0.1:11434/api/generate...
+2026-06-17 12:30:22,226 - JIMI.Brain - WARNING - Ollama inacessível via API: HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=20)
+2026-06-17 14:51:56,801 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 14:52:10,271 - JIMI.Core - INFO - Comando enfileirado: 'ola jimi'
+2026-06-17 14:52:10,271 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'ola jimi'
+2026-06-17 14:52:35,658 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar memory_manager (conflito de DLL/Torch): [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 14:52:36,557 - JIMI.Executor - ERROR - [FALLBACK] Módulo de memória indisponível no Executor: [WinError 1114] Uma rotina de inicialização da biblioteca de vínculo dinâmico (DLL) falhou. Error loading "C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\torch\lib\c10.dll" or one of its dependencies.
+2026-06-17 14:52:36,558 - JIMI.Executor - ERROR - [FALLBACK] Módulo de segurança indisponível no Executor: No module named 'security'
+2026-06-17 14:52:36,558 - JIMI.Brain - INFO - Processando entrada na IA: ola jimi
+2026-06-17 14:52:36,558 - JIMI.Brain - WARNING - Ignorando extração de memória: módulo em modo de fallback.
+2026-06-17 14:52:36,559 - JIMI.Brain - INFO - Enviando requisição HTTP para o Ollama em http://127.0.0.1:11434/api/generate...
+2026-06-17 14:52:56,579 - JIMI.Brain - WARNING - Ollama inacessível via API: HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=20)
+2026-06-17 14:55:21,674 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 14:55:26,572 - JIMI.Core - INFO - Comando enfileirado: 'olá jimi'
+2026-06-17 14:55:26,572 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'olá jimi'
+2026-06-17 14:55:26,728 - JIMI.Executor - ERROR - [FALLBACK] Módulo de segurança indisponível no Executor: No module named 'security'
+2026-06-17 14:55:26,728 - JIMI.Brain - INFO - Processando entrada na IA: olá jimi
+2026-06-17 14:55:26,729 - JIMI.Brain - ERROR - Erro na etapa de extração de memória: 'MemoryManager' object has no attribute 'extract_info'
+2026-06-17 14:55:26,729 - JIMI.Brain - INFO - Enviando requisição HTTP para o Ollama em http://127.0.0.1:11434/api/generate...
+2026-06-17 14:55:46,743 - JIMI.Brain - WARNING - Ollama inacessível via API: HTTPConnectionPool(host='127.0.0.1', port=11434): Read timed out. (read timeout=20)
+2026-06-17 14:55:46,744 - JIMI.Brain - ERROR - Erro ao salvar a interação na memória: 'MemoryManager' object has no attribute 'add_interaction'
+2026-06-17 15:01:23,574 - JIMI.Core - INFO - JIMI Automation System Initialized & Worker Thread Running.
+2026-06-17 15:01:30,428 - JIMI.Core - INFO - Comando enfileirado: 'ola jimi'
+2026-06-17 15:01:30,428 - JIMI.Core - INFO - Encaminhando intenção para processamento cognitivo: 'ola jimi'
+2026-06-17 15:01:30,733 - JIMI.Brain - INFO - Processando entrada na IA: ola jimi
+2026-06-17 15:01:30,733 - JIMI.Brain - INFO - Enviando requisição HTTP para o Ollama em http://127.0.0.1:11434/api/generate...
