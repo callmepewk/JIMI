@@ -84,7 +84,10 @@ class JimiSystem:
                 __import__(path)
                 print(f"  [✓] {name}: OK")
             except Exception as e:
-                print(f"  [X] {name}: OFF ({e})")
+                # MUDANÇA AQUI: Vamos imprimir o erro real
+                print(f"  [X] {name}: OFF (Erro: {e})")
+                import traceback
+                traceback.print_exc() # Isso mostrará exatamente a linha que falhou
 
         print("\n[✓] Inicialização concluída\n")
 
