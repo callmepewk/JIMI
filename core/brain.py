@@ -2,7 +2,7 @@ import json
 import logging
 import requests
 from datetime import datetime
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 logger = logging.getLogger("JIMI.Brain")
 
 # --- ISOLAMENTO DE IMPORTS CRÍTICOS ---
