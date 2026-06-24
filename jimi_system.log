@@ -373,3 +373,77 @@ Defina a variável de ambiente 'PICOVOICE_ACCESS_KEY' ou edite o arquivo config.
 2026-06-19 15:10:01,355 - JIMI.AudioAI - INFO - Processando áudio capturado...
 2026-06-19 15:10:02,157 - JIMI.AudioAI - INFO - Nenhum comando claro identificado no bloco.
 2026-06-19 15:10:03,158 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...
+2026-06-24 18:17:18,331 - JIMI.Main - INFO - [BOOT] Ambiente detectado: DESKTOP
+2026-06-24 18:17:20,734 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar memory_manager: name 'sys' is not defined
+2026-06-24 18:17:20,748 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar executor: name 'sys' is not defined
+2026-06-24 18:17:20,749 - JIMI.Brain - ERROR - [FALLBACK] ServicesManager inacessível pelo Brain: name 'sys' is not defined
+2026-06-24 18:17:46,427 - JIMI.Main - INFO - [BOOT] Ambiente detectado: DESKTOP
+2026-06-24 18:17:46,735 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar memory_manager: name 'sys' is not defined
+2026-06-24 18:17:48,240 - JIMI.Calendar - INFO - Token existente carregado com sucesso.
+2026-06-24 18:17:48,241 - JIMI.Calendar - INFO - Token expirado. Tentando atualizar com o Refresh Token...
+2026-06-24 18:17:48,809 - JIMI.Calendar - INFO - Novo token.json gerado e salvo com sucesso.
+2026-06-24 18:17:48,814 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-06-24 18:17:48,831 - JIMI.Calendar - INFO - Serviço de Google Calendar inicializado com sucesso.
+2026-06-24 18:17:49,895 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar executor: name 'sys' is not defined
+2026-06-24 18:17:49,897 - JIMI.Brain - ERROR - [FALLBACK] ServicesManager inacessível pelo Brain: name 'sys' is not defined
+2026-06-24 18:18:08,314 - JIMI.Main - INFO - [BOOT] Ambiente detectado: DESKTOP
+2026-06-24 18:18:09,014 - JIMI.Calendar - INFO - Token existente carregado com sucesso.
+2026-06-24 18:18:09,016 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-06-24 18:18:09,017 - JIMI.Calendar - INFO - Serviço de Google Calendar inicializado com sucesso.
+2026-06-24 18:18:09,298 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar executor: name 'sys' is not defined
+2026-06-24 18:18:09,300 - JIMI.Brain - ERROR - [FALLBACK] ServicesManager inacessível pelo Brain: name 'sys' is not defined
+2026-06-24 18:20:09,156 - JIMI.Main - INFO - [BOOT] Ambiente detectado: DESKTOP
+2026-06-24 18:20:09,835 - JIMI.Calendar - INFO - Token existente carregado com sucesso.
+2026-06-24 18:20:09,837 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2026-06-24 18:20:09,839 - JIMI.Calendar - INFO - Serviço de Google Calendar inicializado com sucesso.
+2026-06-24 18:20:10,126 - JIMI.VoiceService - WARNING - Aviso: 'voice_engine' não pôde ser importado da pasta 'voice/'. Modo texto ativado.
+2026-06-24 18:20:10,263 - comtypes.client._code_cache - INFO - Imported existing <module 'comtypes.gen' from 'C:\\Users\\pedro\\AppData\\Roaming\\Python\\Python314\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-06-24 18:20:10,263 - comtypes.client._code_cache - INFO - Using writeable comtypes cache directory: 'C:\Users\pedro\AppData\Roaming\Python\Python314\site-packages\comtypes\gen'
+2026-06-24 18:20:10,496 - JIMI.Security - INFO - Watchdog de integridade do código-fonte ativado.
+2026-06-24 18:20:10,499 - JIMI.Brain - ERROR - [FALLBACK] Erro ao carregar executor: name 'os' is not defined
+2026-06-24 18:20:10,625 - JIMI.Main - INFO - [WEB] Servidor web iniciado com sucesso.
+2026-06-24 18:20:10,627 - JIMI.Security - CRITICAL - FRAUDE DE REPOSITORIO DETECTADA! Codigo alterado por usuario nao-autorizado: 'callmepewk'
+2026-06-24 18:20:10,627 - JIMI.Security - WARNING - Executando reversao autonoma de infraestrutura para salvaguardar o nucleo...
+2026-06-24 18:20:10,821 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.6:5000
+2026-06-24 18:20:10,821 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2026-06-24 18:20:10,915 - JIMI.Security - CRITICAL - !!! DISPARANDO PROTOCOLO LOCKDOWN INTERNO !!! Motivo: Codigo corrompido por autor hostil externo: callmepewk
+2026-06-24 18:20:10,915 - JIMI.VoiceEngine - INFO - [Ducking] Restaurando volumes no Windows...
+2026-06-24 18:20:11,002 - JIMI.Security - WARNING - Modificacoes nao controladas em arquivos do Core detectadas fora de escopo controlado.
+2026-06-24 18:20:11,039 - JIMI.VoiceEngine - INFO - [Ducking] Abafando midias de fundo no Windows...
+2026-06-24 18:20:11,115 - JIMI.AudioAI - INFO - Sistema de Voz: Escuta ativa iniciada (Aguardando comando)...
+2026-06-24 18:20:11,115 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...
+2026-06-24 18:20:17,250 - JIMI.AudioAI - INFO - Processando áudio capturado...
+2026-06-24 18:20:18,968 - JIMI.AudioAI - INFO - Transcrição ativa: tentativa de invasão detectada
+2026-06-24 18:20:18,968 - JIMI.AudioAI - INFO - Comando detectado: tentativa de invasão detectada
+2026-06-24 18:20:18,968 - JIMI.Brain - INFO - Processando entrada cognitiva: 'tentativa de invasão detectada'
+2026-06-24 18:20:18,968 - JIMI.ServicesManager - INFO - [SERVICES] Roteando -> Serviço: system | Ação: get_current_context
+2026-06-24 18:20:18,968 - JIMI.SystemService - INFO - Mapeando estado do sistema...
+2026-06-24 18:20:19,073 - JIMI.Brain - INFO - Conectando ao motor Ollama (llama3)...
+2026-06-24 18:20:19,775 - JIMI.VoiceEngine - INFO - [Ducking] Restaurando volumes no Windows...
+2026-06-24 18:20:24,812 - JIMI.Brain - ERROR - Erro HTTP no barramento do Ollama: 500 Server Error: Internal Server Error for url: http://127.0.0.1:11434/api/generate
+2026-06-24 18:20:24,814 - JIMI.ServicesManager - INFO - [SERVICES] Roteando -> Serviço: voice | Ação: speak
+2026-06-24 18:20:24,814 - JIMI.VoiceService - INFO - [TTS Executando]: "Sr. Pedro, meu motor cognitivo retornou um erro de comunicação (HTTP 500)."
+2026-06-24 18:20:25,814 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...
+2026-06-24 18:20:31,900 - JIMI.AudioAI - INFO - Processando áudio capturado...
+2026-06-24 18:20:32,916 - JIMI.AudioAI - INFO - Transcrição ativa: Olá Jimmy
+2026-06-24 18:20:32,917 - JIMI.AudioAI - INFO - Comando detectado: Olá Jimmy
+2026-06-24 18:20:32,917 - JIMI.Brain - INFO - Processando entrada cognitiva: 'Olá Jimmy'
+2026-06-24 18:20:32,917 - JIMI.ServicesManager - INFO - [SERVICES] Roteando -> Serviço: system | Ação: get_current_context
+2026-06-24 18:20:32,917 - JIMI.SystemService - INFO - Mapeando estado do sistema...
+2026-06-24 18:20:33,021 - JIMI.Brain - INFO - Conectando ao motor Ollama (llama3)...
+2026-06-24 18:20:35,899 - JIMI.Brain - ERROR - Erro HTTP no barramento do Ollama: 500 Server Error: Internal Server Error for url: http://127.0.0.1:11434/api/generate
+2026-06-24 18:20:35,900 - JIMI.ServicesManager - INFO - [SERVICES] Roteando -> Serviço: voice | Ação: speak
+2026-06-24 18:20:35,900 - JIMI.VoiceService - INFO - [TTS Executando]: "Sr. Pedro, meu motor cognitivo retornou um erro de comunicação (HTTP 500)."
+2026-06-24 18:20:36,902 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...
+2026-06-24 18:20:42,982 - JIMI.AudioAI - INFO - Processando áudio capturado...
+2026-06-24 18:20:43,859 - JIMI.AudioAI - INFO - Nenhum comando claro identificado no bloco.
+2026-06-24 18:20:44,860 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...
+2026-06-24 18:20:50,942 - JIMI.AudioAI - INFO - Processando áudio capturado...
+2026-06-24 18:20:51,764 - JIMI.AudioAI - INFO - Nenhum comando claro identificado no bloco.
+2026-06-24 18:20:52,764 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...
+2026-06-24 18:20:58,846 - JIMI.AudioAI - INFO - Processando áudio capturado...
+2026-06-24 18:20:59,640 - JIMI.AudioAI - INFO - Nenhum comando claro identificado no bloco.
+2026-06-24 18:21:00,641 - JIMI.AudioAI - INFO - JIMI está ouvindo (capturando bloco de 6s)...

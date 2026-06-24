@@ -82,6 +82,22 @@
                 "user": "Olá, JIMI. Você está operacional?",
                 "jimi": "Compreendido, Sr. Pedro. No momento, meu motor cognitivo central local (Ollama) está offline."
             }
+        },
+        {
+            "timestamp": "2026-06-24T18:20:24.813302",
+            "type": "chat_interaction",
+            "details": {
+                "user": "tentativa de invasão detectada",
+                "jimi": "Sr. Pedro, meu motor cognitivo retornou um erro de comunicação (HTTP 500)."
+            }
+        },
+        {
+            "timestamp": "2026-06-24T18:20:35.900226",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Olá Jimmy",
+                "jimi": "Sr. Pedro, meu motor cognitivo retornou um erro de comunicação (HTTP 500)."
+            }
         }
     ]
 }

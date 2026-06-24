@@ -1,7 +1,7 @@
 import logging
 import subprocess # Adicionado para os comandos Git
 import os         # Adicionado para reinicialização e diretórios
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from services.calendar_service import calendar_service
 from services.whatsapp_service import whatsapp_service
 from services.email_service import email_service
@@ -11,7 +11,7 @@ from services.maps_service import maps_service
 from services.system_service import system_service
 from services.voice_service import voice_service
 from services.network_bridge_service import network_bridge_service
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 logger = logging.getLogger("JIMI.ServicesManager")
 
 class ServicesManager:
