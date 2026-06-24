@@ -1,0 +1,43 @@
+# ==========================================
+# JIMI - REQUIREMENTS PARA PC
+# ==========================================
+
+# --- Essencial, Segurança e Variáveis de Ambiente ---
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# --- Interface Gráfica (Holograma e System Tray) ---
+PyQt5>=5.15.0
+
+# --- Áudio, Voz e Processamento de Sinal ---
+pvporcupine          # Detecção da wake-word ("JIMI")
+pyaudio              # Captura de áudio do microfone
+webrtcvad            # Detecção de atividade de voz (ignora silêncio)
+noisereduce          # Redução de ruído de fundo
+SpeechRecognition    # Tradução do áudio capturado para texto
+pyttsx3              # Síntese de voz offline (A voz do JIMI)
+
+# --- Visão Computacional (Para AR ou Câmera) ---
+opencv-python>=4.8.0 # Essencial se o PC for processar imagens ou controlar webcams
+
+# --- Automação, Monitoramento e Rede ---
+pyautogui            # Controle de mouse e teclado
+psutil               # Monitoramento de CPU/RAM (importante para o Docker)
+wakeonlan            # Ligar outros PCs na rede
+cloudflared          # (Opcional via pip, mas útil se for gerenciar o túnel via script)
+
+# --- Integração com IA (Ollama Local) ---
+ollama>=0.1.6        # Biblioteca oficial para conversar com seu Docker Pythonicamente
+
+# --- Casa Inteligente, IoT e Bluetooth ---
+tinytuya>=1.13.1     # Controle de dispositivos Tuya/SmartLife locais
+bleak>=0.21.1        # Controle e escaneamento de Bluetooth BLE
+
+# --- Integrações de Serviços (Google Cloud Hub) ---
+google-api-python-client>=2.100.0
+google-auth-httplib2>=0.1.1
+google-auth-oauthlib>=1.1.0
+googlemaps           # Para cálculos complexos de rotas
+
+# --- Integração de Mensageria (WhatsApp) ---
+pywhatkit            # Para envio automatizado de mensagens

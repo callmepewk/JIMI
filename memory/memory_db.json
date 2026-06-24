@@ -58,6 +58,30 @@
                 "user": "o motor cognitivo central de imitar desligado",
                 "jimi": "Sr. Pedro, recebi sua mensagem e gostaria de informá-lo que o motor cognitivo central de imitar está desativado. Isso significa que não estarei mais capaz de processar informações e replicar padrões de linguagem observados pelo criador. Por favor, considere reativá-lo para que possamos melhorar a comunicação e efetuar ajustes necessários."
             }
+        },
+        {
+            "timestamp": "2026-06-19T15:08:02.685242",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Oi",
+                "jimi": "Sr. Pedro, meu motor cognitivo retornou um erro de comunicação (HTTP 500)."
+            }
+        },
+        {
+            "timestamp": "2026-06-19T15:09:48.825219",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Jimi, consegue encontrar para mim livros em pdf gratuitos do william george jordan? ( o poder do autocontrole e o poder da verdade)",
+                "jimi": "Sr. Pedro, meu motor cognitivo retornou um erro de comunicação (HTTP 500)."
+            }
+        },
+        {
+            "timestamp": "2026-06-24T16:12:45.162091",
+            "type": "chat_interaction",
+            "details": {
+                "user": "Olá, JIMI. Você está operacional?",
+                "jimi": "Compreendido, Sr. Pedro. No momento, meu motor cognitivo central local (Ollama) está offline."
+            }
         }
     ]
 }
