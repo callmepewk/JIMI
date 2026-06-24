@@ -1,7 +1,19 @@
-# Pastas e arquivos sensíveis
-services/credentials.json
-services/token.json
-data/*.json
-__pycache__/
+# --- Chaves e Tokens (Segurança Máxima) ---
+token.json
+*.json.token
+credentials.json
 .env
+
+# --- Bancos de Dados e Memória Dinâmica ---
+data/*.json
+core/memory/*.json
+.ultima_hash
+
+# --- Logs de Infraestrutura ---
+cloudflared.log
+*.log
+
+# --- Arquivos Temporários de Python e SO ---
+__pycache__/
+*.pyc
 .DS_Store
