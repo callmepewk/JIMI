@@ -14,4 +14,3 @@ google-auth-oauthlib>=1.1.0
 googlemaps
 
 # --- Bibliotecas de Suporte (Sem dependências GUI) ---
-psutil
