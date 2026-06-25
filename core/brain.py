@@ -37,7 +37,7 @@ class Brain:
         self.memory = memory_manager
         self.planner = planner
         self.ollama_model = "llama3" 
-        self.ollama_url = "http://127.0.0.1:11434/api/generate"
+        self.ollama_url = "http://192.168.1.6:11434/api/generate"
 
     def _get_system_context(self):
         """Prepara o estado atual do sistema, hardware e atividades para a LLM."""

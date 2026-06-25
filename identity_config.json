@@ -1,8 +1,8 @@
 {
     "authorized_user": "callmepewk",
     "trusted_devices": [
-        "ID_DO_SEU_PC_PRINCIPAL",
-        "ID_DO_SEU_ANDROID_1",
-        "ID_DO_SEU_ANDROID_2"
+        "192.168.1.6",
+        "192.168.1.12",
+        "192.168.1.24"
     ]
 }
