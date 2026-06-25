@@ -1,9 +1,8 @@
 import os
-import sys
 import signal
 import threading
 import logging
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 # --- DETECÇÃO DE AMBIENTE ---
 IS_TERMUX = "com.termux" in os.environ.get("PREFIX", "")
 IS_ANDROID = IS_TERMUX

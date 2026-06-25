@@ -1,9 +1,8 @@
 import logging
-import sys
 import os
 
 # Garante que a raiz do projeto esteja no path para importar os módulos corretamente
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 
 from services.services_manager import services_manager
 from core.brain import jimi_brain

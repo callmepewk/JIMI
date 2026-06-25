@@ -1,6 +1,6 @@
 import logging
 from services.services_manager import services_manager
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 # --- ISOLAMENTO DE IMPORTS EM CAMADAS DEFENSIVAS ---
 # Mantemos apenas o que é estritamente necessário para a tomada de decisão do executor
 try:

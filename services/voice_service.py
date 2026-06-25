@@ -1,10 +1,7 @@
 # services/voice_service.py
 import logging
 import os
-import sys
 
-# Garante que a pasta raiz esteja no path caso as engines precisem de imports relativos
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Importações direcionadas para a sua estrutura da pasta 'voice'
 try:

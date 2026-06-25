@@ -5,7 +5,7 @@ import requests
 import numpy as np
 from datetime import datetime
 from copy import deepcopy
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 # ==============================
 # VECTOR STORE (SEMÂNTICO VIA OLLAMA)
 # ==============================
