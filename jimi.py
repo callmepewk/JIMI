@@ -6,27 +6,65 @@ import logging
 import types
 
 # ==============================================================================
-# 1. DETECÇÃO DE AMBIENTE E SEQUESTRO DE MÓDULOS (A BARREIRA ABSOLUTA)
+# 1. DETECÇÃO DE AMBIENTE E O "PROTOCOLO FANTASMA" (BARREIRA ABSOLUTA)
 # ==============================================================================
 IS_TERMUX = "com.termux" in os.environ.get("PREFIX", "")
 IS_ANDROID = IS_TERMUX
 IS_DESKTOP = os.name == "nt" or (os.name == "posix" and not IS_TERMUX)
 
-# Se estivermos no Termux, criamos módulos falsos para enganar o Python
-# Isso impede que o sistema quebre se qualquer arquivo tentar fazer "import psutil"
 if IS_TERMUX:
     os.environ["JIMI_ENV"] = "mobile"  # Força a variável de ambiente global
     
-    # Cria um psutil fantasma
-    fake_psutil = types.ModuleType("psutil")
-    fake_psutil.cpu_percent = lambda *args, **kwargs: 0
-    fake_psutil.virtual_memory = lambda *args, **kwargs: type('MockMem', (object,), {'percent': 0})()
-    sys.modules['psutil'] = fake_psutil
+    def create_fake_module(name):
+        """Fábrica de hologramas: cria módulos que não existem, mas o Python acredita que sim."""
+        mod = types.ModuleType(name)
+        
+        # Função coringa que aceita qualquer argumento e não faz nada
+        def fake_func(*args, **kwargs): return None
+        
+        # Classe coringa para simular objetos complexos (ex: Google Credentials)
+        class FakeClass:
+            def __init__(self, *args, **kwargs): pass
+            def __getattr__(self, item): return fake_func
+            def __call__(self, *args, **kwargs): return None
+        
+        # Preenche o módulo falso com métodos comuns para evitar AttributeError
+        mod.get = fake_func
+        mod.post = fake_func
+        mod.request = fake_func
+        mod.build = fake_func
+        mod.Client = FakeClass
+        mod.Credentials = FakeClass
+        mod.__version__ = "999.0.0"  # Engana verificadores de versão
+        
+        return mod
+
+    # Lista Negra: Tudo que quebra no Termux entra aqui
+    ghost_modules = [
+        'psutil',
+        'pygetwindow',
+        'cryptography',
+        'cryptography.fernet',
+        'requests',
+        'urllib3',
+        'googleapiclient',
+        'googleapiclient.discovery',
+        'google.oauth2',
+        'google.oauth2.credentials',
+        'google.auth.transport.requests',
+        'googlemaps'
+    ]
+
+    # Injeta os fantasmas diretamente no cérebro do Python (sys.modules)
+    for mod_name in ghost_modules:
+        sys.modules[mod_name] = create_fake_module(mod_name)
+        
+    # Ajustes finos para módulos que precisam retornar números/objetos específicos
+    sys.modules['psutil'].cpu_percent = lambda *args, **kwargs: 0
+    sys.modules['psutil'].virtual_memory = lambda *args, **kwargs: type('MockMem', (object,), {'percent': 0})()
     
-    # Cria um pygetwindow fantasma
-    fake_gw = types.ModuleType("pygetwindow")
-    fake_gw.getActiveWindow = lambda *args, **kwargs: None
-    sys.modules['pygetwindow'] = fake_gw
+    print("[!] PROTOCOLO FANTASMA ATIVADO: Dependências de PC isoladas com sucesso.")
+
 
 # ==============================================================================
 # 2. CONFIGURAÇÃO CENTRAL DE LOGS
@@ -46,6 +84,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 logger = logging.getLogger("JIMI.Main")
 logger.info(f"[BOOT] Ambiente detectado: {'TERMUX' if IS_TERMUX else 'DESKTOP'}")
+
 
 # ==============================================================================
 # 3. IMPORTAÇÃO DOS SUBSISTEMAS (Protegidas)
@@ -86,12 +125,12 @@ class JimiSystem:
     def show_banner(self):
         banner = """
 ============================================================
-██╗██╗███╗   ███╗██╗     ██████╗  ██████╗  ██████╗ ██████╗
-██║██║████╗ ████║██║     ██╔══██╗██╔═══██╗██╔═══██╗╚════██╗
-██║██║██╔████╔██║██║     ██████╔╝██║   ██║██║   ██║ █████╔╝
-██║██║██║╚██╔╝██║██║     ██╔══██╗██║   ██║██║   ██║ ╚═══██╗
-██║██║██║ ╚═╝ ██║██║     ██████╔╝╚██████╔╝╚██████╔╝██████╔╝
-╚═╝╚═╝╚═╝     ╚═╝╚═╝     ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ 
+██╗██╗███╗   ███╗██╗    ██████╗  ██████╗  ██████╗ ██████╗
+██║██║████╗ ████║██║    ██╔══██╗██╔═══██╗██╔═══██╗╚════██╗
+██║██║██╔████╔██║██║    ██████╔╝██║   ██║██║   ██║ █████╔╝
+██║██║██║╚██╔╝██║██║    ██╔══██╗██║   ██║██║   ██║ ╚═══██╗
+██║██║██║ ╚═╝ ██║██║    ██████╔╝╚██████╔╝╚██████╔╝██████╔╝
+╚═╝╚═╝╚═╝     ╚═╝╚═╝    ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ 
 ============================================================
 """
         print(banner)
@@ -113,10 +152,7 @@ class JimiSystem:
                 __import__(path)
                 print(f"  [✓] {name}: OK")
             except Exception as e:
-                print(f"  [X] {name}: OFF (Erro: {e})")
-                # Se der erro, printa a linha exata sem quebrar o sistema todo
-                import traceback
-                traceback.print_exc()
+                print(f"  [X] {name}: OFF (Erro mascarado: {e})")
 
         print("\n[✓] Inicialização concluída\n")
 
