@@ -1,14 +1,36 @@
 import os
+import sys
 import signal
 import threading
 import logging
+import types
 
-# --- DETECÇÃO DE AMBIENTE ---
+# ==============================================================================
+# 1. DETECÇÃO DE AMBIENTE E SEQUESTRO DE MÓDULOS (A BARREIRA ABSOLUTA)
+# ==============================================================================
 IS_TERMUX = "com.termux" in os.environ.get("PREFIX", "")
 IS_ANDROID = IS_TERMUX
-IS_DESKTOP = os.name == "nt" or os.name == "posix" and not IS_TERMUX
+IS_DESKTOP = os.name == "nt" or (os.name == "posix" and not IS_TERMUX)
 
-# --- CONFIGURAÇÃO CENTRAL DE LOGS DO SISTEMA ---
+# Se estivermos no Termux, criamos módulos falsos para enganar o Python
+# Isso impede que o sistema quebre se qualquer arquivo tentar fazer "import psutil"
+if IS_TERMUX:
+    os.environ["JIMI_ENV"] = "mobile"  # Força a variável de ambiente global
+    
+    # Cria um psutil fantasma
+    fake_psutil = types.ModuleType("psutil")
+    fake_psutil.cpu_percent = lambda *args, **kwargs: 0
+    fake_psutil.virtual_memory = lambda *args, **kwargs: type('MockMem', (object,), {'percent': 0})()
+    sys.modules['psutil'] = fake_psutil
+    
+    # Cria um pygetwindow fantasma
+    fake_gw = types.ModuleType("pygetwindow")
+    fake_gw.getActiveWindow = lambda *args, **kwargs: None
+    sys.modules['pygetwindow'] = fake_gw
+
+# ==============================================================================
+# 2. CONFIGURAÇÃO CENTRAL DE LOGS
+# ==============================================================================
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -23,23 +45,23 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 logger = logging.getLogger("JIMI.Main")
-
 logger.info(f"[BOOT] Ambiente detectado: {'TERMUX' if IS_TERMUX else 'DESKTOP'}")
 
-# --- IMPORTAÇÃO INTELIGENTE DO CÉREBRO ---
+# ==============================================================================
+# 3. IMPORTAÇÃO DOS SUBSISTEMAS (Protegidas)
+# ==============================================================================
 try:
     from core.brain import jimi_brain as brain
-except ImportError:
-    from brain import jimi_brain as brain
+except ImportError as e:
+    logger.critical(f"[BOOT] Falha ao carregar Brain: {e}")
+    brain = None
 
-# --- SERVICES MANAGER ---
 try:
     from services.services_manager import services_manager
 except ImportError:
     logger.warning("[ALERTA] ServicesManager indisponível.")
     services_manager = None
 
-# --- WEB SERVER ---
 try:
     from interface.web_server import web_server
 except ImportError as e:
@@ -49,6 +71,9 @@ except ImportError as e:
 terminal_lock = threading.Lock()
 
 
+# ==============================================================================
+# 4. SISTEMA PRINCIPAL
+# ==============================================================================
 class JimiSystem:
     def __init__(self):
         self.running = True
@@ -62,6 +87,11 @@ class JimiSystem:
         banner = """
 ============================================================
 ██╗██╗███╗   ███╗██╗     ██████╗  ██████╗  ██████╗ ██████╗
+██║██║████╗ ████║██║     ██╔══██╗██╔═══██╗██╔═══██╗╚════██╗
+██║██║██╔████╔██║██║     ██████╔╝██║   ██║██║   ██║ █████╔╝
+██║██║██║╚██╔╝██║██║     ██╔══██╗██║   ██║██║   ██║ ╚═══██╗
+██║██║██║ ╚═╝ ██║██║     ██████╔╝╚██████╔╝╚██████╔╝██████╔╝
+╚═╝╚═╝╚═╝     ╚═╝╚═╝     ╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ 
 ============================================================
 """
         print(banner)
@@ -83,10 +113,10 @@ class JimiSystem:
                 __import__(path)
                 print(f"  [✓] {name}: OK")
             except Exception as e:
-                # MUDANÇA AQUI: Vamos imprimir o erro real
                 print(f"  [X] {name}: OFF (Erro: {e})")
+                # Se der erro, printa a linha exata sem quebrar o sistema todo
                 import traceback
-                traceback.print_exc() # Isso mostrará exatamente a linha que falhou
+                traceback.print_exc()
 
         print("\n[✓] Inicialização concluída\n")
 
@@ -95,7 +125,11 @@ class JimiSystem:
         self.show_banner()
         self.verify_modules()
 
-        # --- WEB SERVER (ESSENCIAL PARA iOS) ---
+        if not brain:
+            print("\n🛑 ERRO CRÍTICO: Brain não carregado. JIMI não pode iniciar.")
+            self.shutdown()
+
+        # --- WEB SERVER ---
         if web_server:
             try:
                 web_server.start()
